@@ -17,7 +17,7 @@ async def on_ready():
     print(f"{client.user} has connected to Discord!")
 
 
-guild_ids = [850148009655795742]
+guild_ids = [850148009655795742, 849687400988409876]
 
 
 @slash.slash(name="ping", guild_ids=guild_ids)
