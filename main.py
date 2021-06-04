@@ -29,7 +29,7 @@ async def _ping(ctx):  # Defines a new "context" (ctx) command called "ping."
     name="ada", description="Return the current price of ADA", guild_ids=guild_ids
 )
 async def _ada(ctx):
-    ada_price = str(round(get_ada_price(), 2))
+    ada_price = str(round(get_ada_price(), 4))
     await ctx.send(f"The current price of ADA is {ada_price}")
 
 
