@@ -4,7 +4,7 @@ import discord
 from discord_slash import SlashCommand
 from crypto import get_ada_price
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.environ["BOT_TOKEN"]
 
 client = discord.Client()
 slash = SlashCommand(
