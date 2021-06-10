@@ -2,7 +2,8 @@
 import os
 import discord
 from discord_slash import SlashCommand
-from crypto import get_ada_price
+from discord_slash.utils.manage_commands import create_option
+from crypto import get_crypto
 
 TOKEN = os.environ["BOT_TOKEN"]
 
@@ -29,8 +30,33 @@ async def _ping(ctx):  # Defines a new "context" (ctx) command called "ping."
     name="ada", description="Return the current price of ADA", guild_ids=guild_ids
 )
 async def _ada(ctx):
-    ada_price = str(round(get_ada_price(), 4))
-    await ctx.send(f"The current price of ADA is {ada_price}")
+    info = (get_crypto("ADA"))
+    price = round(info["quote"]["USD"]["price"], 4)
+    percent_change_24 = round(info["quote"]["USD"]["percent_change_24h"], 2)
+    await ctx.send(f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
 
+
+@slash.slash(
+    name="crypto",
+    description="Return the current price of a crypto",
+    options=[
+        create_option(
+            name="symbol",
+            description="Symbol of the crypto you want to search",
+            option_type=3,
+            required=True
+        )
+    ],
+    guild_ids=guild_ids
+)
+async def _crypto(ctx, symbol: str):
+    info = (get_crypto(symbol.strip().upper()))
+    if info == "error":
+        await ctx.send(f"{symbol.strip()} does not exist")
+    else:
+        price = round(info["quote"]["USD"]["price"], 4)
+        percent_change_24 = round(
+            info["quote"]["USD"]["percent_change_24h"], 2)
+        await ctx.send(f"The current price of {symbol} is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
 
 client.run(TOKEN)
