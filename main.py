@@ -52,11 +52,11 @@ async def _ada(ctx):
 async def _crypto(ctx, symbol: str):
     info = (get_crypto(symbol.strip().upper()))
     if info == "error":
-        await ctx.send(f"{symbol.strip()} does not exist")
+        await ctx.send(f"{symbol.strip().upper()} does not exist")
     else:
         price = round(info["quote"]["USD"]["price"], 4)
         percent_change_24 = round(
             info["quote"]["USD"]["percent_change_24h"], 2)
-        await ctx.send(f"The current price of {symbol} is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
+        await ctx.send(f"The current price of {symbol.strip().upper()} is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
 
 client.run(TOKEN)
