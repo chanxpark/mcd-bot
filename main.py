@@ -1,12 +1,15 @@
 # bot.py
+import io
 import os
-import discord
 import json
+import aiohttp
+import discord
 from discord.ext import commands
 from discord_slash import SlashCommand
 from discord_slash.utils.manage_commands import create_option
 from crypto import get_crypto
 from twitch import get_stream, get_subs, get_user, create_stream_online_sub, delete_sub
+from janet import get_random_image
 
 TOKEN = os.environ["BOT_TOKEN"]
 
@@ -25,6 +28,20 @@ with open("./user_mapping.json", "r+") as f:
         user_mapping = {}
         f.write(json.dumps(user_mapping))
 
+# JANET COMMAND
+# Returns a photo of xchocobars
+@slash.slash(name="janet", description="Get a photo of xChocoBars", guild_ids=guild_ids)
+async def _janet(ctx):
+    img_url = get_random_image()
+    async with aiohttp.ClientSession() as session:
+        async with session.get(img_url) as resp:
+            if resp.status != 200:
+                await ctx.send(f"Something broke. This bot sucks.")
+            else:
+                data = io.BytesIO(await resp.read())
+                await ctx.send(file=discord.File(data, "xChocoBars.jpg"))
+
+
 # CRYTPO COMMANDS
 
 
@@ -32,10 +49,12 @@ with open("./user_mapping.json", "r+") as f:
     name="ada", description="Return the current price of ADA", guild_ids=guild_ids
 )
 async def _ada(ctx):
-    info = (get_crypto("ADA"))
+    info = get_crypto("ADA")
     price = round(info["quote"]["USD"]["price"], 4)
     percent_change_24 = round(info["quote"]["USD"]["percent_change_24h"], 2)
-    await ctx.send(f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
+    await ctx.send(
+        f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**"
+    )
 
 
 @slash.slash(
@@ -46,20 +65,22 @@ async def _ada(ctx):
             name="symbol",
             description="Symbol of the crypto you want to search",
             option_type=3,
-            required=True
+            required=True,
         )
     ],
-    guild_ids=guild_ids
+    guild_ids=guild_ids,
 )
 async def _crypto(ctx, symbol: str):
-    info = (get_crypto(symbol.strip().upper()))
+    info = get_crypto(symbol.strip().upper())
     if info == "error":
         await ctx.send(f"{symbol.strip().upper()} does not exist")
     else:
         price = round(info["quote"]["USD"]["price"], 4)
-        percent_change_24 = round(
-            info["quote"]["USD"]["percent_change_24h"], 2)
-        await ctx.send(f"The current price of {symbol.strip().upper()} is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
+        percent_change_24 = round(info["quote"]["USD"]["percent_change_24h"], 2)
+        await ctx.send(
+            f"The current price of {symbol.strip().upper()} is **{price}**. 24 Hour % Change: **{percent_change_24}%**"
+        )
+
 
 # TWITCH COMMANDS
 
@@ -79,13 +100,13 @@ def save_user_mapping(file):
             name="stream",
             description="Looks up if a stream is online and provides link to stream",
             option_type=3,
-            required=True
+            required=True,
         )
     ],
-    guild_ids=guild_ids
+    guild_ids=guild_ids,
 )
 async def _twitch_stream(ctx, stream: str):
-    stream_info = (get_stream(stream.strip()).json())
+    stream_info = get_stream(stream.strip()).json()
 
     if "error" in stream_info:
         message = f"That is not a valid stream. Please try again."
@@ -103,7 +124,7 @@ async def _twitch_stream(ctx, stream: str):
     subcommand_group="notification",
     name="list",
     description="List active notifications",
-    guild_ids=guild_ids
+    guild_ids=guild_ids,
 )
 async def _twitch_notification_list(ctx):
     sub_list = get_subs().json()
@@ -117,17 +138,17 @@ async def _twitch_notification_list(ctx):
                 user_info = get_user("id", user_id).json()
                 user_mapping[user_id] = {
                     "login": user_info["data"][0]["login"],
-                    "display_name": user_info["data"][0]["display_name"]
-
+                    "display_name": user_info["data"][0]["display_name"],
                 }
                 save_user_mapping(user_mapping)
 
             list_of_stream.append(user_mapping[user_id]["display_name"])
 
-    list_of_stream_string = "".join(["\n" + str(stream)
-                                    for stream in list_of_stream])
+    list_of_stream_string = "".join(["\n" + str(stream) for stream in list_of_stream])
 
-    message = f"You will be notified for the following streamers: {list_of_stream_string}"
+    message = (
+        f"You will be notified for the following streamers: {list_of_stream_string}"
+    )
     await ctx.send(message)
 
 
@@ -138,13 +159,10 @@ async def _twitch_notification_list(ctx):
     description="Add a channel notification for when a streamer comes online",
     options=[
         create_option(
-            name="twitch",
-            description="Twitch user name",
-            option_type=3,
-            required=True
+            name="twitch", description="Twitch user name", option_type=3, required=True
         )
     ],
-    guild_ids=guild_ids
+    guild_ids=guild_ids,
 )
 async def _twitch_notification_add(ctx, twitch_user_name: str):
     # create the subscription
@@ -157,7 +175,9 @@ async def _twitch_notification_add(ctx, twitch_user_name: str):
         # check to make sure the subscription was successful
         data = result.json()
         if result.ok:
-            message = f"Notification for {twitch_user_name} has been successfully added."
+            message = (
+                f"Notification for {twitch_user_name} has been successfully added."
+            )
         else:
             message = f"{data['message']}. Please try again."
 
@@ -171,13 +191,10 @@ async def _twitch_notification_add(ctx, twitch_user_name: str):
     description="Delete a channel notification for when a streamer comes online",
     options=[
         create_option(
-            name="twitch",
-            description="Twitch user name",
-            option_type=3,
-            required=True
+            name="twitch", description="Twitch user name", option_type=3, required=True
         )
     ],
-    guild_ids=guild_ids
+    guild_ids=guild_ids,
 )
 async def _twitch_notification_delete(ctx, twitch_user_name: str):
     twitch_user_info = get_user("login", twitch_user_name).json()
@@ -197,5 +214,14 @@ async def _twitch_notification_delete(ctx, twitch_user_name: str):
             message = f"Invalid request. There is no existing notifications for {twitch_user_name}."
 
     await ctx.send(message)
+
+
+# MUSIC
+
+
+@slash.slash(name="music")
+async def music(ctx):
+    print(ctx.author_id)
+
 
 bot.run(TOKEN)
