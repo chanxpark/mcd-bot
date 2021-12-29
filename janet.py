@@ -13,8 +13,12 @@ def get_random_image() -> str:
 
     soup: BeautifulSoup = BeautifulSoup(instagram_html, "html.parser")
 
-    image_links: List[str] = []
-    for image in soup.find_all("img", class_="FFVAD"):
-        image_links.append(image.get("src"))
+    image_ids: List[str] = []
 
-    return random.choice(image_links)
+    for image in soup.find_all("div", class_="v1Nh3"):
+        i = image.find_all("a")
+        image_ids.append(i[0].get("href"))
+
+    url = f"https://www.instagram.com{random.choice(image_ids)}media/?size=m"
+
+    return url
