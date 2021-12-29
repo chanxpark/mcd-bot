@@ -14,10 +14,11 @@ from janet import get_random_image
 TOKEN = os.environ["BOT_TOKEN"]
 
 bot = commands.Bot(command_prefix="!")
-slash = SlashCommand(bot, sync_commands=True)
+slash = SlashCommand(bot)
 print("MCD Bot successfully connected")
 
 guild_ids = [850148009655795742, 849687400988409876]
+
 
 # for maintaining user names and user id mappings for Twitch
 with open("./user_mapping.json", "r+") as f:
@@ -27,6 +28,7 @@ with open("./user_mapping.json", "r+") as f:
     except:
         user_mapping = {}
         f.write(json.dumps(user_mapping))
+
 
 # JANET COMMAND
 # Returns a photo of xchocobars
