@@ -101,19 +101,25 @@ async def setup(ctx):
     await ctx.defer()
     _guild = await ctx.get_guild()
 
-    # get assets to load
-    assets = load_json('riotgames/assets/assets_list.json')
+    try:
+        # get assets to load
+        assets = load_json('riotgames/assets/assets_list.json')
 
-    _counter = 0
-    for asset_class in assets:
-        for asset in assets[asset_class]:
-            await _guild.create_emoji(
-                Image(f"riotgames/assets/{asset_class}/{asset}.png"),
-                name=f"TFT_{asset_class}_{asset}"
-            )
-            _counter += 1
+        _counter = 0
+        for asset_class in assets:
+            for asset in assets[asset_class]:
+                await _guild.create_emoji(
+                    Image(f"riotgames/assets/{asset_class}/{asset}.png"),
+                    name=f"TFT_{asset_class}_{asset}"
+                )
+                _counter += 1
 
-    logging.logger(f"Successfully loaded {_counter} assets")
+        logging.info(f"Successfully loaded {_counter} assets")
+        ctx.send(f"Successfully loaded {_counter} assets")
+
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        ctx.sent("Error in set up")
 
 
 @bot.command(
