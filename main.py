@@ -29,10 +29,10 @@ async def ada(ctx: interactions.CommandContext):
     await ctx.send(f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
 
 
-"""
 @bot.command(
     name="crypto",
     description="Return the current price of a crypto",
+    scope=guilds,
     options=[
         interactions.Option(
             name="symbol",
@@ -40,8 +40,7 @@ async def ada(ctx: interactions.CommandContext):
             option_type=interactions.OptionType.STRING,
             required=True,
         )
-    ],
-    guild_ids=guild_ids,
+    ]
 )
 async def _crypto(ctx, symbol: str):
     info = get_crypto(symbol.strip().upper())
@@ -53,7 +52,6 @@ async def _crypto(ctx, symbol: str):
         await ctx.send(
             f"The current price of {symbol.strip().upper()} is **{price}**. 24 Hour % Change: **{percent_change_24}%**"
         )
-"""
 
 
 bot.start()
