@@ -1,6 +1,8 @@
 import os
 import logging
 import interactions
+from interactions.api.models.misc import Image
+from utils.tools import load_json
 
 from riotgames.requests import TFT_API
 from crypto import get_crypto
@@ -12,7 +14,7 @@ bot = interactions.Client(token=DISCORD_TOKEN)
 
 # Initialize TFT object
 RG_API_KEY = os.environ["rg_api_key"]
-TFT_API.initialize
+TFT_API.initialize(RG_API_KEY)
 
 guilds = [
     849687400988409876,  # k3MCD
@@ -90,6 +92,29 @@ row = interactions.ActionRow(
 async def matches(ctx):
     await ctx.send("rows!", components=row)
 
+@bot.command(
+    name="setup",
+    description="sets up assets for TFT bot",
+    scope=dev
+)
+async def setup(ctx):
+    await ctx.defer()
+    _guild = await ctx.get_guild()
+
+    # get assets to load
+    assets = load_json('riotgames/assets/assets_list.json')
+
+    _counter = 0
+    for asset_class in assets:
+        for asset in assets[asset_class][0]:
+            await _guild.create_emoji(
+                Image('riotgames/assets/{asset_class}/{asset}.png'),
+                name=f"TFT_{asset_class}_{asset}"
+            )
+            _counter += 1
+
+    logging.logger(f"Successfully loaded {_counter} assets")
+
 
 @bot.command(
     name="cutoff",
@@ -97,8 +122,9 @@ async def matches(ctx):
     scope=guilds
 )
 async def cutoff(ctx):
-    cutoffs = TFT_API.get_ranked_cutoff
-    message = f"""**Chalenger:** {cutoffs['challenger']}
+    await ctx.defer()
+    cutoffs = TFT_API.get_ranked_cutoff()
+    message = f"""**Challenger:** {cutoffs['challenger']}
 **Grandmaster:** {cutoffs['grandmaster']}
 """
     await ctx.send(message)
