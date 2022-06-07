@@ -1,50 +1,32 @@
 import os
-import discord
 import logging
-from discord import app_commands
+import interactions
 
 from crypto import get_crypto
 
 logging.getLogger().setLevel(logging.INFO)
 
 TOKEN = os.environ["BOT_TOKEN"]
+bot = interactions.Client(token=TOKEN)
 
 guilds = [
-    discord.Object(id=849687400988409876),  # k3MCD
-    discord.Object(id=850148009655795742)   # reboob-dev
+    849687400988409876,  # k3MCD
+    850148009655795742   # reboob-dev
 ]
 
 # CRYTPO COMMANDS
 
 
-class aclient(discord.Client):
-    def __init__(self):
-        super().__init__(intents=discord.Intents.default())
-        self.synced = False
-
-    async def on_ready(self):
-        await self.wait_until_ready()
-        if not self.synced:
-            for guild in guilds:
-                await tree.sync(guild=guild)
-                self.synced = True
-        logging.INFO(f"Logged in as {self.user}")
-
-
-client = aclient()
-tree = app_commands.CommandTree(client)
-
-
-@tree.command(
+@bot.command(
     name="ada",
     description="Return the current price of ADA",
-    guilds=guilds
+    scope=guilds
 )
-async def ada(interaction: discord.Interaction):
+async def ada(ctx: interactions.CommandContext):
     info = get_crypto("ADA")
     price = round(info["quote"]["USD"]["price"], 4)
     percent_change_24 = round(info["quote"]["USD"]["percent_change_24h"], 2)
-    await interaction.response.send_message(f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
+    await ctx.response.send_message(f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
 
 
 """
@@ -74,4 +56,4 @@ async def _crypto(ctx, symbol: str):
 """
 
 
-client.run(TOKEN)
+bot.start()
