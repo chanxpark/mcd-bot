@@ -106,9 +106,9 @@ async def setup(ctx):
 
     _counter = 0
     for asset_class in assets:
-        for asset in assets[asset_class][0]:
+        for asset in assets[asset_class]:
             await _guild.create_emoji(
-                Image('riotgames/assets/{asset_class}/{asset}.png'),
+                Image(f"riotgames/assets/{asset_class}/{asset}.png"),
                 name=f"TFT_{asset_class}_{asset}"
             )
             _counter += 1
