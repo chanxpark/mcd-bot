@@ -37,7 +37,7 @@ async def ada(ctx: interactions.CommandContext):
         interactions.Option(
             name="symbol",
             description="Symbol of the crypto you want to search",
-            option_type=interactions.OptionType.STRING,
+            type=interactions.OptionType.STRING,
             required=True,
         )
     ]
