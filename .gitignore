@@ -131,6 +131,6 @@ dmypy.json
 # os
 .DS_Store
 
-# dev 
+# dev
 test.py
 /tmp

@@ -1,5 +1,2 @@
 requests==2.25.1
-discord-py-slash-command==1.2.0
-discord.py==1.7.2
-boto3==1.18.34
-bs4==0.0.1
+discord-py-interactions==4.2.1
