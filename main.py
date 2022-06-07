@@ -1,35 +1,53 @@
-# bot.py
-import io
 import os
-import interactions
+import discord
+import logging
+from discord import app_commands
 
 from crypto import get_crypto
-from janet import get_random_image
+
+logging.getLogger().setLevel(logging.INFO)
 
 TOKEN = os.environ["BOT_TOKEN"]
 
-bot = interactions.Client(token=TOKEN)
-print("MCD Bot successfully connected")
-
-guild_ids = [850148009655795742, 849687400988409876]
+guilds = [
+    discord.Object(id=849687400988409876),  # k3MCD
+    discord.Object(id=850148009655795742)   # reboob-dev
+]
 
 # CRYTPO COMMANDS
 
 
-@bot.command(
+class aclient(discord.Client):
+    def __init__(self):
+        super().__init__(intents=discord.Intents.default())
+        self.synced = False
+
+    async def on_ready(self):
+        await self.wait_until_ready()
+        if not self.synced:
+            for guild in guilds:
+                await tree.sync(guild=guild)
+                self.synced = True
+        logging.INFO(f"Logged in as {self.user}")
+
+
+client = aclient()
+tree = app_commands.CommandTree(client)
+
+
+@tree.command(
     name="ada",
     description="Return the current price of ADA",
-    guild_ids=guild_ids
+    guilds=guilds
 )
-async def _ada(ctx):
+async def ada(interaction: discord.Interaction):
     info = get_crypto("ADA")
     price = round(info["quote"]["USD"]["price"], 4)
     percent_change_24 = round(info["quote"]["USD"]["percent_change_24h"], 2)
-    await ctx.send(
-        f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**"
-    )
+    await interaction.response.send_message(f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
 
 
+"""
 @bot.command(
     name="crypto",
     description="Return the current price of a crypto",
@@ -53,6 +71,7 @@ async def _crypto(ctx, symbol: str):
         await ctx.send(
             f"The current price of {symbol.strip().upper()} is **{price}**. 24 Hour % Change: **{percent_change_24}%**"
         )
+"""
 
 
-bot.start()
+client.run(TOKEN)

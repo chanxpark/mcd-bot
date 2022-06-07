@@ -1,2 +1,2 @@
 requests==2.25.1
-discord-py-interactions==4.2.1
+-e git+https://github.com/Rapptz/discord.py.git@4e7529138c8ed9ee9fffaf6be2f95b5a1b3dd6e2#egg=discord.py
