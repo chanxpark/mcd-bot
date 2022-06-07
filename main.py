@@ -26,7 +26,7 @@ async def ada(ctx: interactions.CommandContext):
     info = get_crypto("ADA")
     price = round(info["quote"]["USD"]["price"], 4)
     percent_change_24 = round(info["quote"]["USD"]["percent_change_24h"], 2)
-    await ctx.response.send_message(f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
+    await ctx.send(f"The current price of ADA is **{price}**. 24 Hour % Change: **{percent_change_24}%**")
 
 
 """
