@@ -91,12 +91,17 @@ class TFT():
         """
         returns metadata on the summoner (i.e., id, account id, puuid, and etc.)
         """
-        path = f"/tft/summoner/v1/summoners/by-name/{summoner_name}"
+        sanitize_summoner_name = sanitize_str(summoner_name)
 
-        results = self.get(path)
-        self.set_summoners(results)
+        if sanitize_summoner_name in self.summoners:
+            return self.summoners[sanitize_summoner_name]
+        else:
+            path = f"/tft/summoner/v1/summoners/by-name/{sanitize_summoner_name}"
 
-        return results
+            results = self.get(path)
+            self.set_summoners(results)
+
+            return results
 
     def get_summoner_data(self, summoner_id) -> list:
         path = f"/tft/league/v1/entries/by-summoner/{summoner_id}"
@@ -109,6 +114,32 @@ class TFT():
     def get_match(self, match_id) -> list:
         path = f"/tft/match/v1/matches/{match_id}"
         return self.get(path, routing="region")
+
+    def get_ranked_stats(self, summoner_name: str) -> list:
+        _metadata = self.get_summoner_metadata(summoner_name)
+        _data = self.get_summoner_data(_metadata['id'])
+
+        # there are multiple kinds of queue data (i.e., ranked vs hyperroll)
+        # get RANKED_TFT data
+        _ranked_data = None
+        for queue in _data:
+            print(queue)
+            if queue['queueType'] == "RANKED_TFT":
+                _ranked_data = queue
+
+        if _ranked_data is None:
+            return {}
+
+        ranked_stats = {}
+        ranked_stats['name'] = _ranked_data['summonerName']
+        ranked_stats['tier'] = _ranked_data['tier']
+        ranked_stats['rank'] = _ranked_data['rank']
+        ranked_stats['lp'] = _ranked_data['leaguePoints']
+        ranked_stats['wins'] = _ranked_data['wins']
+        ranked_stats['win_rate'] = _ranked_data['wins'] / (_ranked_data['wins'] + _ranked_data['losses'])
+        ranked_stats['played'] = _ranked_data['wins'] + _ranked_data['losses']
+
+        return ranked_stats
 
 
 TFT_API = TFT()

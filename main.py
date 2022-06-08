@@ -2,9 +2,9 @@ import os
 import logging
 import interactions
 from interactions.api.models.misc import Image
-from utils.tools import load_json
+from utils.tools import load_json, sanitize_str
 
-from riotgames.requests import TFT_API
+from riotgames.requests import TFT, TFT_API
 from crypto import get_crypto
 
 logging.getLogger().setLevel(logging.INFO)
@@ -108,18 +108,20 @@ async def setup(ctx):
         _counter = 0
         for asset_class in assets:
             for asset in assets[asset_class]:
-                await _guild.create_emoji(
+                logging.info(f"creating emoji for TFT_{asset_class}_{asset}")
+                created = await _guild.create_emoji(
                     Image(f"riotgames/assets/{asset_class}/{asset}.png"),
                     name=f"TFT_{asset_class}_{asset}"
                 )
+                print(created)
                 _counter += 1
 
         logging.info(f"Successfully loaded {_counter} assets")
-        ctx.send(f"Successfully loaded {_counter} assets")
+        await ctx.send(f"Successfully loaded {_counter} assets")
 
     except Exception as e:
         logging.error(f"Error: {e}")
-        ctx.sent("Error in set up")
+        await ctx.send("Error in set up")
 
 
 @bot.command(
@@ -129,11 +131,64 @@ async def setup(ctx):
 )
 async def cutoff(ctx):
     await ctx.defer()
-    cutoffs = TFT_API.get_ranked_cutoff()
-    message = f"""**Challenger:** {cutoffs['challenger']}
-**Grandmaster:** {cutoffs['grandmaster']}
-"""
-    await ctx.send(message)
+    try:
+        cutoffs = TFT_API.get_ranked_cutoff()
+        message = f"""**Challenger:** {cutoffs['challenger']}
+    **Grandmaster:** {cutoffs['grandmaster']}
+    """
+        await ctx.send(message)
+
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        await ctx.send("There was an error")
+
+
+@bot.command(
+    name="rank",
+    description="get rank of a player",
+    scope=guilds,
+    options=[
+        interactions.Option(
+            name="summoner",
+            description="summoner name to search",
+            type=interactions.OptionType.STRING,
+            required=True,
+        )
+    ]
+)
+async def rank(ctx, summoner: str):
+    stats = TFT_API.get_ranked_stats(summoner)
+    message = interactions.Embed(title=stats['name'])
+
+    _full_rank = stats['tier']
+    if stats['tier'] not in ['Master', 'Grandmaster', 'Challenger']:
+        _full_rank += f" {stats['rank']}"
+
+    message.add_field(
+        name="Tier",
+        value=f"{_full_rank} - {stats['lp']}LP",
+        inline=False
+    )
+
+    message.add_field(
+        name="Wins",
+        value=stats['wins'],
+        inline=True
+    )
+
+    message.add_field(
+        name="Win Rate",
+        value=round(stats['win_rate'], 1),
+        inline=True
+    )
+
+    message.add_field(
+        name="Total Played",
+        value=stats['played'],
+        inline=True
+    )
+
+    await ctx.send(embeds=[message])
 
 
 bot.start()
