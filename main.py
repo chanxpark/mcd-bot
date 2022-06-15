@@ -135,8 +135,8 @@ async def cutoff(ctx):
     try:
         cutoffs = TFT_API.get_ranked_cutoff()
         message = f"""**Challenger:** {cutoffs['challenger']}
-    **Grandmaster:** {cutoffs['grandmaster']}
-    """
+**Grandmaster:** {cutoffs['grandmaster']}
+"""
         await ctx.send(message)
 
     except Exception as e:
