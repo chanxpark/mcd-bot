@@ -172,14 +172,14 @@ async def rank(ctx, summoner: str):
     )
 
     ranked_info_embed.add_field(
-        name="Wins",
+        name="Top4",
         value=stats['wins'],
         inline=True
     )
 
     ranked_info_embed.add_field(
-        name="Win Rate",
-        value=round(stats['win_rate'], 1),
+        name="Top4 Rate",
+        value=f"{int(round(stats['win_rate'], 2) * 100)}%",
         inline=True
     )
 
@@ -191,8 +191,8 @@ async def rank(ctx, summoner: str):
 
     message = f"""**{stats['name']}**
 **Rank:** {_full_rank} - {stats['lp']}
-**Wins:** {stats['wins']}
-**Win Rate:** {round(stats['win_rate'], 1)}
+**Top4:** {stats['wins']}
+**Top4 Rate:** {int(round(stats['win_rate'], 2) * 100)}%
 **Total Played:** {stats['played']}
 """
 
