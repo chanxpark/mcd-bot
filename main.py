@@ -92,6 +92,7 @@ row = interactions.ActionRow(
 async def matches(ctx):
     await ctx.send("rows!", components=row)
 
+
 @bot.command(
     name="setup",
     description="sets up assets for TFT bot",
@@ -160,7 +161,7 @@ async def rank(ctx, summoner: str):
     stats = TFT_API.get_ranked_stats(summoner)
     ranked_info_embed = interactions.Embed(title=stats['name'])
 
-    _full_rank = stats['tier'].upper()
+    _full_rank = stats['tier'].capitalize()
     if stats['tier'] not in ['Master', 'Grandmaster', 'Challenger']:
         _full_rank += f" {stats['rank']}"
 
@@ -189,10 +190,10 @@ async def rank(ctx, summoner: str):
     )
 
     message = f"""**{stats['name']}**
-Rank: {_full_rank} - {stats['lp']}
-Wins: {stats['wins']}
-Win Rate: {round(stats['win_rate'], 1)}
-Total Played: {stats['played']}
+**Rank:** {_full_rank} - {stats['lp']}
+**Wins:** {stats['wins']}
+**Win Rate:** {round(stats['win_rate'], 1)}
+**Total Played:** {stats['played']}
 """
 
     # embeds not working properly -> wait til next release for interactions
