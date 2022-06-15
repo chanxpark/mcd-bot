@@ -160,7 +160,7 @@ async def rank(ctx, summoner: str):
     stats = TFT_API.get_ranked_stats(summoner)
     ranked_info_embed = interactions.Embed(title=stats['name'])
 
-    _full_rank = stats['tier']
+    _full_rank = stats['tier'].upper()
     if stats['tier'] not in ['Master', 'Grandmaster', 'Challenger']:
         _full_rank += f" {stats['rank']}"
 

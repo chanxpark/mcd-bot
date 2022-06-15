@@ -71,6 +71,9 @@ class TFT():
         get 250th rank and 750th rank for challenger and grandmaster, respectively
         """
 
+        _challenger_cutoff = 500
+        _grandmaster_cutoff = 200
+
         _challenger_list = self._get_challenger()
         _grandmaster_list = self._get_grandmaster()
         _master_list = self._get_master()
@@ -79,9 +82,18 @@ class TFT():
         _lp_list += [d['leaguePoints'] for d in _master_list['entries']]
         _lp_list.sort(reverse=True)
 
+        # ensure the list is 750 in length
+        # at beginning of set, there may be less people in challenger and grandmaster
+        # use hard LP cut off instead of top LPs: 200 for grandmaster; 500 for challenger
+        if len(_lp_list) < 750:
+            _lp_list += [0] * (750 - len(_lp_list))
+
+        print(_lp_list)
+        print(len(_lp_list))
+
         return {
-            'challenger': _lp_list[249],
-            'grandmaster': _lp_list[749]
+            'challenger': _challenger_cutoff if _lp_list[249] < _challenger_cutoff else _lp_list[249],
+            'grandmaster': _grandmaster_cutoff if _lp_list[749] < _grandmaster_cutoff else _lp_list[749]
         }
 
     def set_summoners(self, summoner_info) -> None:
