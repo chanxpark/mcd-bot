@@ -158,37 +158,46 @@ async def cutoff(ctx):
 )
 async def rank(ctx, summoner: str):
     stats = TFT_API.get_ranked_stats(summoner)
-    message = interactions.Embed(title=stats['name'])
+    ranked_info_embed = interactions.Embed(title=stats['name'])
 
     _full_rank = stats['tier']
     if stats['tier'] not in ['Master', 'Grandmaster', 'Challenger']:
         _full_rank += f" {stats['rank']}"
 
-    message.add_field(
-        name="Tier",
+    ranked_info_embed.add_field(
+        name="Rank",
         value=f"{_full_rank} - {stats['lp']}LP",
         inline=False
     )
 
-    message.add_field(
+    ranked_info_embed.add_field(
         name="Wins",
         value=stats['wins'],
         inline=True
     )
 
-    message.add_field(
+    ranked_info_embed.add_field(
         name="Win Rate",
         value=round(stats['win_rate'], 1),
         inline=True
     )
 
-    message.add_field(
+    ranked_info_embed.add_field(
         name="Total Played",
         value=stats['played'],
         inline=True
     )
 
-    await ctx.send(embeds=[message])
+    message = f"""**{stats['name']}**
+Rank: {_full_rank} - {stats['lp']}
+Wins: {stats['wins']}
+Win Rate: {round(stats['win_rate'], 1)}
+Total Played: {stats['played']}
+"""
+
+    # embeds not working properly -> wait til next release for interactions
+    # await ctx.send(embeds=ranked_info_embed)
+    await ctx.send(message)
 
 
 bot.start()

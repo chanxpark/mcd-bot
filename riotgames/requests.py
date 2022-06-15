@@ -123,7 +123,6 @@ class TFT():
         # get RANKED_TFT data
         _ranked_data = None
         for queue in _data:
-            print(queue)
             if queue['queueType'] == "RANKED_TFT":
                 _ranked_data = queue
 
